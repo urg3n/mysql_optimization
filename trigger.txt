@@ -1,0 +1,66 @@
+
+IF(expression ,expr_true, expr_false);
+eg. if(1>3,true,false)
+
+mysql> select IF(1>3,'seems true','its false');
++----------------------------------+
+| IF(1>3,'seems true','its false') |
++----------------------------------+
+| its false                        |
++----------------------------------+
+
+mysql> select IF(4<9,'seems true','its false');
++----------------------------------+
+| IF(4<9,'seems true','its false') |
++----------------------------------+
+| seems true                       |
++----------------------------------+
+
+List triggers and delete trigger
+
+mysql> show triggers \G;
+
+DROP TRIGGER IF EXISTS `foo`;
+
+
+Create table 
+mysql> CREATE TABLE account (acct_num INT, amount DECIMAL(10,2));
+
+Creating trigger
+mysql> CREATE TRIGGER ins_sum BEFORE INSERT ON account FOR EACH ROW SET @sum = @sum + NEW.amount;
+
+Test/Use trigger
+mysql> SET @sum = 0;
+mysql> INSERT INTO account VALUES(137,14.98),(141,1937.50),(97,-100.00);
+mysql> SELECT @sum AS 'Total amount inserted';
+
+Delete trigger
+DROP TRIGGER  table_name.ins_sum;\
+
+
+
+mysql> delimiter //
+ CREATE TRIGGER upd_check BEFORE UPDATE ON account
+ FOR EACH ROW
+ BEGIN
+   IF NEW.amount < 0 THEN
+        SET NEW.amount = 0;
+   ELSEIF NEW.amount > 100 THEN
+        SET NEW.amount = 100;
+    END IF;
+  END;
+mysql> delimiter ;
+
+Create trigger to restrict zero values in employee.salary field
+
+delimiter $$
+create trigger foo before insert on emp
+for each row 
+begin
+if new.sal=0 then
+signal sqlstate '45000';
+    #below is optional
+    #SET MESSAGE_TEXT = 'Salary should have value greater than zero';
+end if;
+
+end; $$
